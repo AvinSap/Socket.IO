@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h3 id="title"></h3>
+  <input id="msg" placeholder="Type a message" />
+  <button id="send">Send</button>
+  <ul id="chat"></ul>
+  
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    const name = prompt('Your name?') || 'Anonymous';
+    const room = prompt('Room name? (e.g. general, random)') || 'general';
+    document.getElementById('title').textContent = `Room: ${room}`;   // show which room you're in
+
+    const socket = io('http://localhost:8080');
+    const input = document.getElementById('msg');
+
+    // Join the room as soon as the page loads
+    socket.emit('join', { name, room });
+
+    // Show messages from your room
+    socket.on('chat', (msg) => {
+      const li = document.createElement('li');
+      li.textContent = msg;
+      document.getElementById('chat').appendChild(li);
+    });
+
+    // Send a message to your room
+    document.getElementById('send').onclick = () => {
+      if (!input.value.trim()) return;
+      socket.emit('chat', { room, msg: `${name}: ${input.value}` });
+      input.value = '';
+    };
+  </script>
+</body>
+</html>
